@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <title>School Admin Simulator (M365 + Entra)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  styles.css
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <!-- LOGIN FLOW -->
+  <!-- LOGIN FLOW (Microsoft-like) -->
   <div id="loginScreen" class="screen">
     <div class="loginShell">
       <div class="loginBrand">
@@ -20,15 +20,19 @@
       </div>
 
       <div class="loginCard">
-
         <!-- STEP 1: EMAIL -->
         <div id="step-email" class="loginStep">
           <h1>Sign in</h1>
-          <p class="muted">Use your demo username (example: <b>ict.demo</b>)</p>
+          <p class="muted">Use a demo account (e.g. <b>ict.demo</b>, <b>global.demo</b>)</p>
 
           <label class="field">
             Email, phone, or Skype
             <input id="loginEmail" type="text" placeholder="e.g. ict.demo" autocomplete="off" />
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="deviceCompliantFlag" />
+            Mark this device as <b>compliant</b> (simulated)
           </label>
 
           <div class="row between">
@@ -40,7 +44,7 @@
             <div class="hintTitle">Demo accounts</div>
             <div class="hintText">
               <code>student.demo</code>, <code>teacher.demo</code>, <code>helpdesk.demo</code>, <code>ict.demo</code>, <code>global.demo</code><br/>
-              Fake password for all: <code>demo</code>
+              Password for all: <code>demo</code>
             </div>
           </div>
         </div>
@@ -48,7 +52,6 @@
         <!-- STEP 2: PASSWORD -->
         <div id="step-password" class="loginStep hidden">
           <button class="backBtn" id="btnBackToEmail" type="button">←</button>
-
           <div class="whoBox">
             <div class="whoPill" id="whoPill">user</div>
             <div class="muted tiny" id="tenantPill">Tenant: Demo School</div>
@@ -72,7 +75,7 @@
           </div>
 
           <p class="muted tiny">
-            This is a simulator. Never enter real passwords.
+            Simulator only. Never enter real passwords.
           </p>
 
           <p class="muted tiny" id="lockoutMsg" style="display:none;"></p>
@@ -81,7 +84,7 @@
         <!-- STEP 3: STAY SIGNED IN -->
         <div id="step-stay" class="loginStep hidden">
           <h1>Stay signed in?</h1>
-          <p class="muted">This is a fake prompt to match the Microsoft flow.</p>
+          <p class="muted">This recreates the real Microsoft prompt.</p>
 
           <label class="toggle">
             <input type="checkbox" id="staySignedIn" checked />
@@ -97,16 +100,11 @@
         <!-- STEP 4: MFA (NUMBER MATCHING) -->
         <div id="step-mfa" class="loginStep hidden">
           <h1>Approve sign-in request</h1>
-          <p class="muted">
-            MFA is required by tenant policy (simulated).
-          </p>
+          <p class="muted">MFA is required by tenant policy (simulated).</p>
 
           <div class="mfaBox">
             <div class="mfaTitle">Number matching</div>
-            <div class="mfaText">
-              Enter the number shown in your Authenticator app:
-            </div>
-
+            <div class="mfaText">Enter the number shown in your Authenticator app:</div>
             <div class="codeBig" id="mfaNumber">83</div>
 
             <label class="field">
@@ -134,7 +132,7 @@
 
       <div class="loginFooter">
         <button id="btnResetAll" class="danger" type="button">Reset simulator data</button>
-        <div class="muted tiny">All data is stored in your browser (localStorage).</div>
+        <div class="muted tiny">Data is stored in your browser (localStorage).</div>
       </div>
     </div>
   </div>
@@ -158,9 +156,6 @@
       <nav id="nav">
         <button class="nav-btn active" data-view="dashboard">Dashboard</button>
         <button class="nav-btn" data-view="users">Users</button>
-        <button class="nav-btn" data-view="groups">Groups</button>
-        <button class="nav-btn" data-view="licenses">Licenses</button>
-        <button class="nav-btn" data-view="entra">Entra ID</button>
         <button class="nav-btn" data-view="policies">Policies</button>
         <button class="nav-btn" data-view="audit">Audit Logs</button>
         <button class="nav-btn" data-view="export">Export / Import</button>
@@ -185,18 +180,22 @@
             <h3>Quick Stats</h3>
             <div class="stats">
               <div><div class="muted">Users</div><div class="big" id="statUsers">0</div></div>
-              <div><div class="muted">Groups</div><div class="big" id="statGroups">0</div></div>
-              <div><div class="muted">Licenses</div><div class="big" id="statLic">0</div></div>
-              <div><div class="muted">Sign-ins (fake)</div><div class="big" id="statSignins">0</div></div>
+              <div><div class="muted">Compliant device</div><div class="big" id="statDevice">No</div></div>
+              <div><div class="muted">MFA Required</div><div class="big" id="statMfa">No</div></div>
+              <div><div class="muted">Idle Timeout</div><div class="big">5 min</div></div>
             </div>
           </div>
 
           <div class="panel">
-            <h3>Policies (Simulated)</h3>
+            <h3>Policies</h3>
             <ul class="list">
               <li>MFA Required: <b id="pMfa">No</b></li>
-              <li>Copilot Enabled: <b id="pCopilot">No</b></li>
+              <li>Require Compliant Device: <b id="pDevice">No</b></li>
               <li>OneDrive Quota: <b id="pQuota">10 GB</b></li>
+              <li>Copilot Enabled: <b id="pCopilot">No</b></li>
+              <li>Password Policy:
+                <b id="pPwSummary">min 8, number, uppercase</b>
+              </li>
             </ul>
           </div>
 
@@ -207,19 +206,64 @@
         </div>
       </section>
 
-      <!-- (Keep your other sections here if you already have them) -->
-      <!-- For simplicity, this version focuses on upgraded login + security logic. -->
+      <!-- USERS -->
+      <section class="view" id="view-users">
+        <header class="head">
+          <h2>Users</h2>
+          <div class="row">
+            <button id="btnShowAddUser" class="primary">+ Add user</button>
+          </div>
+        </header>
 
+        <div class="panel hidden" id="userForm">
+          <h3>Create user</h3>
+          <div class="grid">
+            <label>Display name <input id="newUserName" placeholder="e.g. Nur Aisyah" /></label>
+            <label>Email <input id="newUserEmail" placeholder="e.g. aisyah@student.edu" /></label>
+            <label>Role
+              <select id="newUserRole"></select>
+            </label>
+          </div>
+          <div class="row">
+            <button class="primary" id="btnAddUser">Create</button>
+            <button id="btnCancelAddUser">Cancel</button>
+          </div>
+          <p class="muted tiny">Password is set later by Helpdesk using “Reset PW” (policy enforced).</p>
+        </div>
+
+        <div class="panel">
+          <div class="row between">
+            <input id="userSearch" placeholder="Search name/email..." />
+            <span class="muted tiny" id="userCount">0 users</span>
+          </div>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- POLICIES -->
       <section class="view" id="view-policies">
         <header class="head">
           <h2>Policies (Tenant)</h2>
-          <span class="muted tiny">ICT Admin / Global Admin can change (simulated)</span>
+          <span class="muted tiny">Only ICT Admin / Global Admin can change</span>
         </header>
 
         <div class="panel">
+          <h3>Access Policies</h3>
           <label class="toggle">
             <input type="checkbox" id="polMfa" />
             Require MFA for all users
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="polRequireDevice" />
+            Require compliant device to sign in
           </label>
           <label class="toggle">
             <input type="checkbox" id="polCopilot" />
@@ -228,12 +272,31 @@
           <label>OneDrive quota (GB)
             <input type="number" id="polQuota" min="1" step="1" value="10" />
           </label>
+        </div>
+
+        <div class="panel">
+          <h3>Password Policy</h3>
+          <div class="grid">
+            <label>Minimum length
+              <input type="number" id="polPwMinLen" min="4" value="8" />
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="polPwRequireNumber" checked />
+              Require at least one number
+            </label>
+            <label class="toggle">
+              <input type="checkbox" id="polPwRequireUpper" checked />
+              Require at least one uppercase letter
+            </label>
+          </div>
           <div class="row">
             <button class="primary" id="btnSavePolicies">Save policies</button>
           </div>
+          <p class="muted tiny">Password policy is enforced on Helpdesk “Reset PW”.</p>
         </div>
       </section>
 
+      <!-- AUDIT -->
       <section class="view" id="view-audit">
         <header class="head">
           <h2>Audit Logs</h2>
@@ -246,9 +309,30 @@
         </div>
       </section>
 
+      <!-- EXPORT / IMPORT -->
+      <section class="view" id="view-export">
+        <header class="head">
+          <h2>Export / Import</h2>
+        </header>
+
+        <div class="panel">
+          <p><b>Export</b> simulator state to JSON.</p>
+          <button class="primary" id="btnExport">Download JSON</button>
+        </div>
+
+        <div class="panel">
+          <p><b>Import</b> JSON (replaces current data).</p>
+          <input type="file" id="importFile" accept="application/json" />
+        </div>
+
+        <div class="panel danger">
+          <p><b>Reset</b> all data.</p>
+          <button class="danger" id="btnReset">Reset everything</button>
+        </div>
+      </section>
     </main>
   </div>
 
-  app.js</script>
+  <script src="app.js"></script>
 </body>
 </html>
