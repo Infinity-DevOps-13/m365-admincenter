@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>School Admin Simulator (M365 + Entra)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  styles.css
+</head>
+<body>
+
+  <!-- LOGIN FLOW -->
+  <div id="loginScreen" class="screen">
+    <div class="loginShell">
+      <div class="loginBrand">
+        <div class="msLogo">□</div>
+        <div>
+          <div class="brandTop">Microsoft</div>
+          <div class="brandSub">School Admin Simulator</div>
+        </div>
+      </div>
+
+      <div class="loginCard">
+
+        <!-- STEP 1: EMAIL -->
+        <div id="step-email" class="loginStep">
+          <h1>Sign in</h1>
+          <p class="muted">Use your demo username (example: <b>ict.demo</b>)</p>
+
+          <label class="field">
+            Email, phone, or Skype
+            <input id="loginEmail" type="text" placeholder="e.g. ict.demo" autocomplete="off" />
+          </label>
+
+          <div class="row between">
+            <button class="linkBtn" id="btnCreateAccount" type="button">No account? Create one!</button>
+            <button class="primary" id="btnNextToPassword" type="button">Next</button>
+          </div>
+
+          <div class="hintBox">
+            <div class="hintTitle">Demo accounts</div>
+            <div class="hintText">
+              <code>student.demo</code>, <code>teacher.demo</code>, <code>helpdesk.demo</code>, <code>ict.demo</code>, <code>global.demo</code><br/>
+              Fake password for all: <code>demo</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: PASSWORD -->
+        <div id="step-password" class="loginStep hidden">
+          <button class="backBtn" id="btnBackToEmail" type="button">←</button>
+
+          <div class="whoBox">
+            <div class="whoPill" id="whoPill">user</div>
+            <div class="muted tiny" id="tenantPill">Tenant: Demo School</div>
+          </div>
+
+          <h1>Enter password</h1>
+
+          <label class="field">
+            Password
+            <input id="loginPassword" type="password" placeholder="demo" autocomplete="off" />
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="showPw" />
+            Show password
+          </label>
+
+          <div class="row between">
+            <button class="linkBtn" id="btnForgotPw" type="button">Forgot password?</button>
+            <button class="primary" id="btnSignIn" type="button">Sign in</button>
+          </div>
+
+          <p class="muted tiny">
+            This is a simulator. Never enter real passwords.
+          </p>
+
+          <p class="muted tiny" id="lockoutMsg" style="display:none;"></p>
+        </div>
+
+        <!-- STEP 3: STAY SIGNED IN -->
+        <div id="step-stay" class="loginStep hidden">
+          <h1>Stay signed in?</h1>
+          <p class="muted">This is a fake prompt to match the Microsoft flow.</p>
+
+          <label class="toggle">
+            <input type="checkbox" id="staySignedIn" checked />
+            Yes, keep me signed in (simulated)
+          </label>
+
+          <div class="row between">
+            <button id="btnNoStay" type="button">No</button>
+            <button class="primary" id="btnYesStay" type="button">Yes</button>
+          </div>
+        </div>
+
+        <!-- STEP 4: MFA (NUMBER MATCHING) -->
+        <div id="step-mfa" class="loginStep hidden">
+          <h1>Approve sign-in request</h1>
+          <p class="muted">
+            MFA is required by tenant policy (simulated).
+          </p>
+
+          <div class="mfaBox">
+            <div class="mfaTitle">Number matching</div>
+            <div class="mfaText">
+              Enter the number shown in your Authenticator app:
+            </div>
+
+            <div class="codeBig" id="mfaNumber">83</div>
+
+            <label class="field">
+              Enter number
+              <input id="mfaInput" type="text" inputmode="numeric" maxlength="2" placeholder="83" />
+            </label>
+
+            <div class="row between">
+              <button id="btnMfaCancel" type="button">Cancel</button>
+              <button class="primary" id="btnMfaVerify" type="button">Verify</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: ERROR -->
+        <div id="step-error" class="loginStep hidden">
+          <h1>We couldn’t sign you in</h1>
+          <p class="muted" id="errorText">Something went wrong.</p>
+          <div class="row">
+            <button id="btnBackToStart" class="primary" type="button">Try again</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="loginFooter">
+        <button id="btnResetAll" class="danger" type="button">Reset simulator data</button>
+        <div class="muted tiny">All data is stored in your browser (localStorage).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appScreen" class="screen hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">∞</div>
+        <div>
+          <div class="title">Admin Simulator</div>
+          <div class="subtitle" id="orgName">School Tenant</div>
+        </div>
+      </div>
+
+      <div class="who">
+        <div class="who-line"><b id="whoName">User</b></div>
+        <div class="who-line muted">Role: <span id="whoRole">Role</span></div>
+      </div>
+
+      <nav id="nav">
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view="users">Users</button>
+        <button class="nav-btn" data-view="groups">Groups</button>
+        <button class="nav-btn" data-view="licenses">Licenses</button>
+        <button class="nav-btn" data-view="entra">Entra ID</button>
+        <button class="nav-btn" data-view="policies">Policies</button>
+        <button class="nav-btn" data-view="audit">Audit Logs</button>
+        <button class="nav-btn" data-view="export">Export / Import</button>
+      </nav>
+
+      <div class="footer">
+        <button id="btnLogout">Logout</button>
+        <small class="muted">Browser-only • localStorage</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <!-- DASHBOARD -->
+      <section class="view active" id="view-dashboard">
+        <header class="head">
+          <h2>Dashboard</h2>
+          <span class="badge" id="tenantBadge">Tenant: School</span>
+        </header>
+
+        <div class="cards">
+          <div class="panel">
+            <h3>Quick Stats</h3>
+            <div class="stats">
+              <div><div class="muted">Users</div><div class="big" id="statUsers">0</div></div>
+              <div><div class="muted">Groups</div><div class="big" id="statGroups">0</div></div>
+              <div><div class="muted">Licenses</div><div class="big" id="statLic">0</div></div>
+              <div><div class="muted">Sign-ins (fake)</div><div class="big" id="statSignins">0</div></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Policies (Simulated)</h3>
+            <ul class="list">
+              <li>MFA Required: <b id="pMfa">No</b></li>
+              <li>Copilot Enabled: <b id="pCopilot">No</b></li>
+              <li>OneDrive Quota: <b id="pQuota">10 GB</b></li>
+            </ul>
+          </div>
+
+          <div class="panel">
+            <h3>Role Capabilities (Your Access)</h3>
+            <ul class="list" id="roleCaps"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- (Keep your other sections here if you already have them) -->
+      <!-- For simplicity, this version focuses on upgraded login + security logic. -->
+
+      <section class="view" id="view-policies">
+        <header class="head">
+          <h2>Policies (Tenant)</h2>
+          <span class="muted tiny">ICT Admin / Global Admin can change (simulated)</span>
+        </header>
+
+        <div class="panel">
+          <label class="toggle">
+            <input type="checkbox" id="polMfa" />
+            Require MFA for all users
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="polCopilot" />
+            Enable Copilot for all users (simulated)
+          </label>
+          <label>OneDrive quota (GB)
+            <input type="number" id="polQuota" min="1" step="1" value="10" />
+          </label>
+          <div class="row">
+            <button class="primary" id="btnSavePolicies">Save policies</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-audit">
+        <header class="head">
+          <h2>Audit Logs</h2>
+          <div class="row">
+            <button id="btnClearAudit" class="danger">Clear logs</button>
+          </div>
+        </header>
+        <div class="panel">
+          <ul class="log" id="auditList"></ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  app.js</script>
+</body>
+</html>
