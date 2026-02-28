@@ -193,9 +193,7 @@
               <li>Require Compliant Device: <b id="pDevice">No</b></li>
               <li>OneDrive Quota: <b id="pQuota">10 GB</b></li>
               <li>Copilot Enabled: <b id="pCopilot">No</b></li>
-              <li>Password Policy:
-                <b id="pPwSummary">min 8, number, uppercase</b>
-              </li>
+              <li>Password Policy: <b id="pPwSummary">min 8, number, uppercase</b></li>
             </ul>
           </div>
 
@@ -210,9 +208,6 @@
       <section class="view" id="view-users">
         <header class="head">
           <h2>Users</h2>
-          <div class="row">
-            <button id="btnShowAddUser" class="primary">+ Add user</button>
-          </div>
         </header>
 
         <div class="panel hidden" id="userForm">
@@ -233,6 +228,7 @@
 
         <div class="panel">
           <div class="row between">
+            <button id="btnShowAddUser" class="primary">+ Add user</button>
             <input id="userSearch" placeholder="Search name/email..." />
             <span class="muted tiny" id="userCount">0 users</span>
           </div>
