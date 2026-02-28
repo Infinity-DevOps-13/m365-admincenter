@@ -354,3 +354,6 @@ function renderAudit(){ auditList.innerHTML=""; if(!isRoleAtLeast(ROLES.HELPDESK
 function exportJson(){ if(!isRoleAtLeast(ROLES.ICT_ADMIN)) return alert("Access denied."); const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"}); const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="admin-sim-state.json"; a.click(); audit("EXPORT: Downloaded state"); }
 async function importJson(e){ if(!isRoleAtLeast(ROLES.ICT_ADMIN)) return alert("Access denied."); const file=e.target.files?.[0]; if(!file) return; const text=await file.text(); try{ const obj=JSON.parse(text); if(!obj.users||!obj.policies||!obj.audit) throw new Error("Invalid format"); state=obj; saveState(); audit("IMPORT: Loaded state"); renderAll(); alert("Import successful."); }catch{ alert("Invalid JSON file."); } }
 function resetEverything(){ if(confirm("Reset simulator data?")){ localStorage.removeItem(STORE); localStorage.removeItem(SESSION_KEY); state=clone(defaultState); saveState(); alert("Reset complete."); showLogin(); } }
+
+// ---- tiny smoke-test: log to console so you know JS loaded
+console.log("Admin SIM loaded ✔");
